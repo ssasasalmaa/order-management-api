@@ -1,11 +1,12 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { userRoutes } from './routes/user.routes.js';
+import { orderRoutes } from './routes/order.routes.js';
 
 const app = Fastify({ logger: true });
 
-// Daftarkan rute user dengan prefix /api
 app.register(userRoutes, { prefix: '/api/users' });
+app.register(orderRoutes, { prefix: '/api/orders' });
 
 const bootstrap = async () => {
   try {
