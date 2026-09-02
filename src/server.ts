@@ -1,18 +1,20 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
+import { userRoutes } from './routes/user.routes.js';
 
-const server = Fastify({ logger: true });
+const app = Fastify({ logger: true });
 
-server.get('/health', async (request, reply) => {
-  return { status: 'ok', message: 'Order Management API is running!' };
-});
+// Daftarkan rute user dengan prefix /api
+app.register(userRoutes, { prefix: '/api/users' });
 
-const start = async () => {
+const bootstrap = async () => {
   try {
-    await server.listen({ port: 3000, host: '0.0.0.0' });
+    await app.listen({ port: 3000, host: '0.0.0.0' });
+    console.log('Server is running on http://localhost:3000');
   } catch (err) {
-    server.log.error(err);
+    app.log.error(err);
     process.exit(1);
   }
 };
 
-start();
+bootstrap();
