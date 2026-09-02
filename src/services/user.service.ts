@@ -1,8 +1,10 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository.js';
 
 export class UserService {
   private userRepository = new UserRepository();
+  private readonly JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_fallback';
 
   async register(data: { email: string; password: string; name: string }) {
     const existingUser = await this.userRepository.findByEmail(data.email);
@@ -18,8 +20,28 @@ export class UserService {
       name: data.name,
     });
 
-    // Sembunyikan password sebelum dikembalikan ke controller
     const { password, ...result } = user;
     return result;
+  }
+
+  async login(data: { email: string; password: string }) {
+    const user = await this.userRepository.findByEmail(data.email);
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid email or password');
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      this.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    const { password, ...result } = user;
+    return { user: result, token };
   }
 }
