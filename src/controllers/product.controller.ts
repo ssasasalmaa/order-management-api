@@ -6,10 +6,20 @@ export class ProductController {
 
   public getAll = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
-      const products = await this.productService.getAllProducts();
+      const query = req.query as {
+        page?: string;
+        limit?: string;
+        search?: string;
+        category?: string;
+        sortBy?: string;
+        order?: 'asc' | 'desc';
+      };
+
+      const result = await this.productService.getAllProducts(query);
       return reply.code(200).send({
         message: 'Products fetched successfully',
-        data: products,
+        data: result.data,
+        meta: result.meta,
       });
     } catch (error: any) {
       return reply.code(500).send({ message: error.message });
