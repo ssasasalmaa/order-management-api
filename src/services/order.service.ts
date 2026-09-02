@@ -1,49 +1,66 @@
 import { OrderRepository } from '../repositories/order.repository.js';
-import prisma from '../config/database.js'; 
-
-const orderRepository = new OrderRepository();
+import { CartRepository } from '../repositories/cart.repository.js';
 
 export class OrderService {
-  async createOrder(userId: string, items: { productId: string; quantity: number }[]) {
-    if (!items || items.length === 0) {
-      throw new Error('Order must contain at least one item');
+  private orderRepository = new OrderRepository();
+  private cartRepository = new CartRepository();
+
+  // Proses Checkout: Ubah keranjang belanja jadi Order
+  async checkout(userId: string) {
+    // 1. Ambil keranjang user beserta item dan produknya
+    const cart = await this.cartRepository.findByUserId(userId);
+    if (!cart || cart.items.length === 0) {
+      throw new Error('Cart is empty');
     }
 
-    let totalPrice = 0;
-    const validatedItems = [];
+    let totalAmount = 0;
+    const orderItemsData = [];
 
-    for (const item of items) {
-      const product = await prisma.product.findUnique({
-        where: { id: item.productId },
-      });
+    // 2. Validasi stok dan hitung total harga
+    for (const cartItem of cart.items) {
+      const product = cartItem.product;
 
-      if (!product) {
-        throw new Error(`Product with ID ${item.productId} not found`);
-      }
-
-      if (product.stock < item.quantity) {
+      if (product.stock < cartItem.quantity) {
         throw new Error(`Insufficient stock for product: ${product.name}`);
       }
 
-      const itemPrice = Number(product.price);
-      totalPrice += itemPrice * item.quantity;
+      const itemTotal = Number(product.price) * cartItem.quantity;
+      totalAmount += itemTotal;
 
-      validatedItems.push({
+      orderItemsData.push({
         productId: product.id,
-        quantity: item.quantity,
-        price: itemPrice,
-      });
-
-      await prisma.product.update({
-        where: { id: product.id },
-        data: { stock: product.stock - item.quantity },
+        quantity: cartItem.quantity,
+        price: product.price,
       });
     }
 
-    return await orderRepository.create(userId, validatedItems, totalPrice);
+    // 3. Buat order dan kurangi stok lewat repository (prisma transaction)
+    const order = await this.orderRepository.createOrderFromCart(
+      userId,
+      orderItemsData,
+      totalAmount
+    );
+
+    return order;
   }
 
+  // Ambil riwayat order milik user
   async getUserOrders(userId: string) {
-    return await orderRepository.findByUserId(userId);
+    return await this.orderRepository.findByUserId(userId);
+  }
+
+  // Ambil detail order berdasarkan ID
+  async getOrderById(orderId: string, userId: string) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) {
+      throw new Error('Order not found');
+    }
+    
+    // Pastikan order ini milik user yang bersangkutan
+    if (order.userId !== userId) {
+      throw new Error('Unauthorized access to order');
+    }
+
+    return order;
   }
 }

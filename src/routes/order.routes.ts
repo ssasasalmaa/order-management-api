@@ -5,8 +5,8 @@ import { verifyJWT } from '../middlewares/auth.middleware.js';
 export async function orderRoutes(fastify: FastifyInstance) {
   const orderController = new OrderController();
 
-  fastify.addHook('preHandler', verifyJWT);
-
-  fastify.post('/', orderController.create);
-  fastify.get('/', orderController.getAllByUser);
+  // Semua rute order wajib login
+  fastify.post('/checkout', { preHandler: [verifyJWT] }, orderController.checkout);
+  fastify.get('/', { preHandler: [verifyJWT] }, orderController.getUserOrders);
+  fastify.get('/:id', { preHandler: [verifyJWT] }, orderController.getOrderById);
 }

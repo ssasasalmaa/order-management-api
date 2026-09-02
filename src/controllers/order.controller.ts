@@ -1,47 +1,55 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { OrderService } from '../services/order.service.js';
 
-const orderService = new OrderService();
-
 export class OrderController {
-  create = async (req: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return reply.code(401).send({ error: 'Unauthorized' });
-      }
+  private orderService = new OrderService();
 
-      const body = req.body as { items: { productId: string; quantity: number }[] };
-      const order = await orderService.createOrder(userId, body.items);
+  // Proses Checkout keranjang menjadi Order
+  public checkout = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const userId = (req.user as { userId: string }).userId;
+      const order = await this.orderService.checkout(userId);
 
       return reply.code(201).send({
-        message: 'Order created successfully',
+        message: 'Checkout successful, order created',
         data: order,
       });
     } catch (error: any) {
-      return reply.code(400).send({
-        error: error.message || 'Failed to create order',
-      });
+      const statusCode = error.message === 'Cart is empty' ? 400 : error.message.includes('Insufficient stock') ? 400 : 500;
+      return reply.code(statusCode).send({ message: error.message });
     }
   };
 
-  getAllByUser = async (req: FastifyRequest, reply: FastifyReply) => {
+  // Ambil daftar riwayat order user yang sedang login
+  public getUserOrders = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return reply.code(401).send({ error: 'Unauthorized' });
-      }
-
-      const orders = await orderService.getUserOrders(userId);
+      const userId = (req.user as { userId: string }).userId;
+      const orders = await this.orderService.getUserOrders(userId);
 
       return reply.code(200).send({
-        message: 'Orders fetched successfully',
+        message: 'User orders fetched successfully',
         data: orders,
       });
     } catch (error: any) {
-      return reply.code(400).send({
-        error: error.message || 'Failed to fetch orders',
+      return reply.code(500).send({ message: error.message });
+    }
+  };
+
+  // Ambil detail order berdasarkan ID
+  public getOrderById = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const userId = (req.user as { userId: string }).userId;
+      const { id } = req.params as { id: string };
+
+      const order = await this.orderService.getOrderById(id, userId);
+
+      return reply.code(200).send({
+        message: 'Order details fetched successfully',
+        data: order,
       });
+    } catch (error: any) {
+      const statusCode = error.message === 'Order not found' ? 404 : error.message === 'Unauthorized access to order' ? 403 : 500;
+      return reply.code(statusCode).send({ message: error.message });
     }
   };
 }
