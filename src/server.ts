@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
+import fastifyRateLimit from '@fastify/rate-limit';
+import { redis } from './config/redis.js';
 import { userRoutes } from './routes/user.routes.js';
 import { orderRoutes } from './routes/order.routes.js';
 import { productRoutes } from './routes/product.routes.js';
@@ -7,6 +9,19 @@ import { cartRoutes } from './routes/cart.routes.js';
 import { sendError } from './utils/response.util.js';
 
 const app = Fastify({ logger: true });
+
+// --- Setup Redis Rate Limiter ---
+await app.register(fastifyRateLimit, {
+  max: 50000,           // Naikkan max request per time window selama testing
+  timeWindow: '1 minute',
+  redis: redis,
+  errorResponseBuilder: (req, context) => {
+    return {
+      success: false,
+      message: `Rate limit terlampaui. Coba lagi dalam ${context.after}`,
+    };
+  },
+});
 
 app.register(userRoutes, { prefix: '/api/users' });
 app.register(orderRoutes, { prefix: '/api/orders' });
