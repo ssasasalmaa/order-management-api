@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository.js';
+import { userResponseSchema } from '../validations/auth.validation.js';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -21,7 +22,9 @@ export class UserService {
     });
 
     const { password, ...result } = user;
-    return result;
+    
+    // Validasi response menggunakan Zod
+    return userResponseSchema.parse(result);
   }
 
   async login(data: { email: string; password: string }) {
@@ -42,6 +45,10 @@ export class UserService {
     );
 
     const { password, ...result } = user;
-    return { user: result, token };
+    
+    // Validasi response user menggunakan Zod
+    const safeUser = userResponseSchema.parse(result);
+
+    return { user: safeUser, token };
   }
 }
