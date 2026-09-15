@@ -6,6 +6,7 @@ describe('Auth Validation Unit Test', () => {
     const validData = {
       email: 'salsabila@example.com',
       password: 'securepassword123',
+      name: 'Test User',
     };
 
     const result = registerSchema.safeParse(validData);

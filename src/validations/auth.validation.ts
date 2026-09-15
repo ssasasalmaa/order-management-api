@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const registerSchema = z.object({
   email: z.string().email({ message: 'Format email tidak valid' }),
   password: z.string().min(6, { message: 'Password minimal harus 6 karakter' }),
+  name: z.string().min(1, { message: 'Nama tidak boleh kosong' }),
 });
 
 export const loginSchema = z.object({
