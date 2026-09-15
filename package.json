@@ -5,8 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx watch src/server.ts"
+  "test": "vitest",
+  "test:run": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/ssasasalmaa/order-management-api#readme",
   "devDependencies": {
+    "@swc/core": "^1.16.2",
     "@types/bcrypt": "^6.0.0",
     "@types/ioredis": "^4.28.10",
     "@types/jsonwebtoken": "^9.0.10",
@@ -28,7 +29,9 @@
     "autocannon": "^8.0.0",
     "prisma": "^7.10.0",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "unplugin-swc": "^1.6.0",
+    "vitest": "^5.0.0"
   },
   "dependencies": {
     "@bull-board/api": "^9.10.1",
