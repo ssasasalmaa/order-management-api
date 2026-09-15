@@ -8,6 +8,7 @@ import { productRoutes } from './routes/product.routes.js';
 import { cartRoutes } from './routes/cart.routes.js';
 import { sendError } from './utils/response.util.js';
 import './workers/order.worker.js';
+import { registerBullBoard } from './routes/bull-board.route.js';
 
 const app = Fastify({ logger: true });
 
@@ -28,6 +29,7 @@ app.register(userRoutes, { prefix: '/api/users' });
 app.register(orderRoutes, { prefix: '/api/orders' });
 app.register(productRoutes, { prefix: '/api/products' });
 app.register(cartRoutes, { prefix: '/api/cart' });
+await registerBullBoard(app);
 
 // --- Global Error Handler ---
 app.setErrorHandler((error: any, req, reply) => {

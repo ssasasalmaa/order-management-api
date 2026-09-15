@@ -43,10 +43,22 @@ export class OrderService {
     );
 
     // 4. Masukkan tugas ke Background Queue BullMQ secara asinkron
-    await orderQueue.add('process-order', {
-      orderId: order.id,
-      userId: userId,
-    });
+    await orderQueue.add(
+      'process-order',
+      {
+        orderId: order.id,
+        userId: userId,
+      },
+      {
+        attempts: 3, 
+        backoff: {
+          type: 'exponential',
+          delay: 5000, 
+        },
+        removeOnComplete: true, 
+        removeOnFail: false,
+      }
+    );
 
     return order;
   }
