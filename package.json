@@ -5,6 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "test": "vitest",
     "test:run": "vitest run",
     "dev": "tsx watch src/server.ts"
@@ -25,7 +26,7 @@
     "@types/bcrypt": "^6.0.0",
     "@types/ioredis": "^4.28.10",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.1",
     "@types/pg": "^8.23.1",
     "autocannon": "^8.0.0",
     "dotenv": "^17.4.2",
