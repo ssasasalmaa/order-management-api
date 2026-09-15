@@ -34,6 +34,8 @@
     "@bull-board/api": "^9.10.1",
     "@bull-board/express": "^9.10.1",
     "@bull-board/fastify": "^9.10.1",
+    "@fastify/cors": "^11.3.0",
+    "@fastify/helmet": "^13.1.1",
     "@fastify/rate-limit": "^11.2.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",

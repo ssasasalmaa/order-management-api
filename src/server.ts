@@ -9,6 +9,8 @@ import { cartRoutes } from './routes/cart.routes.js';
 import { sendError } from './utils/response.util.js';
 import './workers/order.worker.js';
 import { registerBullBoard } from './routes/bull-board.route.js';
+import fastifyCors from '@fastify/cors';
+import fastifyHelmet from '@fastify/helmet';
 
 const app = Fastify({ logger: true });
 
@@ -25,11 +27,17 @@ await app.register(fastifyRateLimit, {
   },
 });
 
+await app.register(fastifyCors, {
+  origin: true, 
+  credentials: true, 
+});
+
+await app.register(fastifyHelmet);
+
 app.register(userRoutes, { prefix: '/api/users' });
 app.register(orderRoutes, { prefix: '/api/orders' });
 app.register(productRoutes, { prefix: '/api/products' });
 app.register(cartRoutes, { prefix: '/api/cart' });
-await registerBullBoard(app);
 
 // --- Global Error Handler ---
 app.setErrorHandler((error: any, req, reply) => {
