@@ -7,6 +7,7 @@ import { orderRoutes } from './routes/order.routes.js';
 import { productRoutes } from './routes/product.routes.js';
 import { cartRoutes } from './routes/cart.routes.js';
 import { sendError } from './utils/response.util.js';
+import './workers/order.worker.js';
 
 const app = Fastify({ logger: true });
 

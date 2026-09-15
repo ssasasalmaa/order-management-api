@@ -1,5 +1,6 @@
 import { OrderRepository } from '../repositories/order.repository.js';
 import { CartRepository } from '../repositories/cart.repository.js';
+import { orderQueue } from '../queues/order.queue.js';
 
 export class OrderService {
   private orderRepository = new OrderRepository();
@@ -41,9 +42,15 @@ export class OrderService {
       totalAmount
     );
 
+    // 4. Masukkan tugas ke Background Queue BullMQ secara asinkron
+    await orderQueue.add('process-order', {
+      orderId: order.id,
+      userId: userId,
+    });
+
     return order;
   }
-
+  
   // Ambil riwayat order milik user
   async getUserOrders(userId: string) {
     return await this.orderRepository.findByUserId(userId);

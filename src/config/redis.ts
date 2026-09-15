@@ -6,6 +6,7 @@ const redisPort = Number(process.env.REDIS_PORT) || 6379;
 export const redis = new Redis({
   host: redisHost,
   port: redisPort,
+  maxRetriesPerRequest: null,
 });
 
 redis.on('connect', () => {
