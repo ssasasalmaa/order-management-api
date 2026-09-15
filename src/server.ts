@@ -12,21 +12,25 @@ import { registerBullBoard } from './routes/bull-board.route.js';
 import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
 
-// 1. Buat fungsi buildApp supaya bisa dipakai ulang sama Vitest
 export async function buildApp() {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: {
+      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      ...(process.env.NODE_ENV !== 'production' && {
+        transport: {
+          target: 'pino-pretty',
+          options: { translateTime: 'HH:MM:ss Z', ignore: 'pid,hostname' },
+        },
+      }),
+    } as any, 
+    genReqId: (req) => (req.headers['x-request-id'] as string) || crypto.randomUUID(),
+    trustProxy: true,
+  });
 
-  // --- Setup Redis Rate Limiter ---
-  await app.register(fastifyRateLimit, {
-    max: 50000,
-    timeWindow: '1 minute',
-    redis: redis,
-    errorResponseBuilder: (req, context) => {
-      return {
-        success: false,
-        message: `Rate limit terlampaui. Coba lagi dalam ${context.after}`,
-      };
-    },
+  // Hook untuk menyisipkan x-request-id ke response header
+  app.addHook('onRequest', (request, reply, done) => {
+    reply.header('x-request-id', request.id);
+    done();
   });
 
   await app.register(fastifyCors, {
