@@ -1,16 +1,15 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
-import fastifyRateLimit from '@fastify/rate-limit';
-import { redis } from './config/redis.js';
 import { userRoutes } from './routes/user.routes.js';
 import { orderRoutes } from './routes/order.routes.js';
 import { productRoutes } from './routes/product.routes.js';
 import { cartRoutes } from './routes/cart.routes.js';
 import { sendError } from './utils/response.util.js';
 import './workers/order.worker.js';
-import { registerBullBoard } from './routes/bull-board.route.js';
 import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
 export async function buildApp() {
   const app = Fastify({
@@ -40,6 +39,36 @@ export async function buildApp() {
 
   await app.register(fastifyHelmet);
 
+  // 1. Daftarkan Swagger di dalam buildApp
+  await app.register(swagger, {
+    openapi: {
+      info: {
+        title: 'Order Management API',
+        description: 'Dokumentasi API untuk Backend Order Management System',
+        version: '1.0.0',
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+  });
+
+  // 2. Daftarkan Swagger UI
+  await app.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: false,
+    },
+  });
+
+  // 3. Daftarkan Routes Aplikasi
   app.register(userRoutes, { prefix: '/api/users' });
   app.register(orderRoutes, { prefix: '/api/orders' });
   app.register(productRoutes, { prefix: '/api/products' });
@@ -61,7 +90,7 @@ export async function buildApp() {
   return app;
 }
 
-// 2. Jalankan server hanya jika file ini dijalankan langsung (bukan saat di-import untuk testing)
+// Jalankan server hanya jika file ini dijalankan langsung (bukan saat di-import untuk testing)
 if (process.env.NODE_ENV !== 'test') {
   const bootstrap = async () => {
     try {

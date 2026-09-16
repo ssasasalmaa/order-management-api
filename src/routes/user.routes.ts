@@ -8,12 +8,57 @@ import { sendSuccess } from '../utils/response.util.js';
 export async function userRoutes(fastify: FastifyInstance) {
   const userController = new UserController();
 
-  fastify.post('/register', { preHandler: [validateRequest(registerSchema)] }, userController.register);
-  fastify.post('/login', { preHandler: [validateRequest(loginSchema)] }, userController.login);
+  fastify.post(
+    '/register', 
+    {
+      schema: {
+        tags: ['Authentication'],
+        description: 'Register a new user account',
+        body: {
+          type: 'object',
+          required: ['email', 'password', 'name'],
+          properties: {
+            email: { type: 'string', format: 'email' },
+            password: { type: 'string', minLength: 6 },
+            name: { type: 'string' },
+          },
+        },
+      },
+      preHandler: [validateRequest(registerSchema)],
+    }, 
+    userController.register
+  );
+
+  fastify.post(
+    '/login', 
+    {
+      schema: {
+        tags: ['Authentication'],
+        description: 'Login to user account and get JWT token',
+        body: {
+          type: 'object',
+          required: ['email', 'password'],
+          properties: {
+            email: { type: 'string', format: 'email' },
+            password: { type: 'string' },
+          },
+        },
+      },
+      preHandler: [validateRequest(loginSchema)],
+    }, 
+    userController.login
+  );
 
   fastify.get(
     '/profile',
-    { preHandler: [verifyJWT] },
+    {
+      schema: {
+        tags: ['User'],
+        description: 'Get current logged in user profile',
+        security: [{ bearerAuth: [] }], 
+      },
+      preHandler: [verifyJWT],
+    },
     async (req, reply) => {
       return sendSuccess(reply, 200, 'Profile fetched successfully', req.user);
     }
