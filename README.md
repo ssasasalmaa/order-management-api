@@ -32,7 +32,6 @@ This project is designed as a learning and portfolio project focused on building
 ### Security & Validation
 
 * **Zod**
-* **Argon2**
 * **Helmet**
 * **CORS**
 * **Rate Limiting**
@@ -53,7 +52,6 @@ This project is designed as a learning and portfolio project focused on building
 * **Pino**
 * **Request ID**
 * **Prometheus**
-* **Grafana**
 * **OpenTelemetry**
 
 ### Performance Testing
@@ -135,7 +133,7 @@ The authentication system supports:
 
 * User registration
 * User login
-* Password hashing with Argon2
+* Password hashing 
 * JWT authentication
 * Refresh tokens
 * Logout and token invalidation
@@ -429,7 +427,7 @@ Database concepts implemented throughout the project include:
 The API includes several security mechanisms:
 
 * JWT authentication
-* Argon2 password hashing
+* password hashing
 * Role-based authorization
 * Request validation
 * CORS configuration
@@ -828,7 +826,7 @@ This validates the interaction between authentication, product management, cart,
 
 * [x] Registration
 * [x] Login
-* [x] Argon2 password hashing
+* [x] password hashing
 * [x] JWT authentication
 * [x] Authentication middleware
 * [x] Role-based authorization
@@ -921,7 +919,6 @@ This validates the interaction between authentication, product management, cart,
 * [x] OpenTelemetry
 * [x] Distributed tracing
 * [x] Prometheus
-* [x] Grafana
 
 ## Phase 12 — CI/CD
 
